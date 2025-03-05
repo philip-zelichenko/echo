@@ -1,1 +1,67 @@
- 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Echo Assistant specific
+installer/
+.echo_assistant/
+*.log
+echo_assistant.pid
+config.json
+*.env
+*.wav
+*.mp3
+
+# Personal data
+~/.echo_assistant/
+/Applications/Echo Assistant.app/
+*.key
+*.pem
+*.crt
+*.p12
+
+# Build artifacts
+*.spec
+*.app
+*.dmg
+
+# Poetry
+poetry.lock 

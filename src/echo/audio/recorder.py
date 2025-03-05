@@ -1,7 +1,6 @@
 import sounddevice as sd
 import numpy as np
 import threading
-import pyaudio
 from echo.utils.config import config
 from echo.utils.logger import get_logger
 
@@ -10,87 +9,66 @@ class AudioRecorder:
         self.logger = get_logger(__name__)
         self.sample_rate = config.audio.SAMPLE_RATE
         self.channels = config.audio.CHANNELS
-        self.chunk_size = config.audio.CHUNK_SIZE
         self.recording = False
         self.should_stop = False
         self.stream = None
         self.stream_lock = threading.Lock()
         self.audio_buffer = []
-        self.frames = []
         self.callback_fn = None  # Add this line to store the callback
 
-    def audio_callback(self, in_data, frame_count, time_info, status):
-        """Callback for audio stream"""
-        try:
-            if status:
-                self.logger.warning(f"Audio callback status: {status}")
+    def audio_callback(self, indata, frames, time, status, callback):
+        """Process audio data from the microphone"""
+        if status:
+            self.logger.warning(f"Audio callback status: {status}")
+        
+        if self.recording and not self.should_stop:
+            try:
+                # Convert to float32 if needed
+                audio_data = indata.copy()
+                if audio_data.dtype != np.float32:
+                    audio_data = audio_data.astype(np.float32)
                 
-            if self.is_recording:
-                # Convert to numpy array to check audio levels
-                audio_data = np.frombuffer(in_data, dtype=np.float32)
-                level = np.abs(audio_data).mean()
-                if level > 0.001:  # Log when audio is detected
-                    self.logger.info(f"Audio level: {level:.4f}")
-                self.frames.append(in_data)
+                # Show audio level bars
+                level = np.mean(np.abs(audio_data))
+                if level > 0.001:  # Lower threshold for more sensitivity
+                    bars = int(level * 100)
+                    print(f"\rAudio Level: {'█' * bars}{' ' * (50-min(bars, 50))}", end='', flush=True)
+                    
+                    # Add to buffer
+                    self.audio_buffer.append(audio_data)
                 
-            return (in_data, pyaudio.paContinue)
-            
-        except Exception as e:
-            self.logger.error(f"Error in audio callback: {e}")
-            return (None, pyaudio.paComplete)
+            except Exception as e:
+                self.logger.error(f"Error in audio callback: {e}")
 
     def start(self, callback):
         """Start recording audio"""
+        self.recording = True
+        self.should_stop = False
+        self.audio_buffer = []
+        self.callback_fn = callback  # Store the callback
+        
         try:
-            # Initialize PyAudio
-            self.audio = pyaudio.PyAudio()
+            with self.stream_lock:
+                self.stream = sd.InputStream(
+                    channels=self.channels,
+                    samplerate=self.sample_rate,
+                    callback=lambda *args: self.audio_callback(*args, callback),
+                    blocksize=int(self.sample_rate * 0.05)  # Smaller blocks for smoother updates
+                )
+                self.stream.start()
             
-            # Find the right input device
-            device_count = self.audio.get_host_api_info_by_index(0).get('deviceCount')
-            input_device_index = None
+            self.logger.info("Audio recording started")
+            print("\nRecording... (Press F9 to stop)")
             
-            for i in range(device_count):
-                device_info = self.audio.get_device_info_by_index(i)
-                self.logger.info(f"Found audio device: {device_info['name']}")
+            # Keep recording until stopped
+            while self.recording and not self.should_stop:
+                sd.sleep(10)  # Shorter sleep for more responsive updates
                 
-                if (device_info.get('maxInputChannels') > 0 and
-                    not device_info['name'].startswith('_') and
-                    'Built-in' in device_info['name']):
-                    input_device_index = i
-                    self.logger.info(f"Selected input device: {device_info['name']}")
-                    break
-            
-            if input_device_index is None:
-                # Fallback to default device
-                input_device_index = self.audio.get_default_input_device_info()['index']
-                
-            # Store callback
-            self.callback_fn = callback
-                
-            # Open stream with explicit settings
-            self.stream = self.audio.open(
-                format=pyaudio.paFloat32,
-                channels=1,
-                rate=self.sample_rate,
-                input=True,
-                input_device_index=input_device_index,
-                frames_per_buffer=self.chunk_size,
-                stream_callback=self.audio_callback
-            )
-            
-            self.is_recording = True
-            self.logger.info("Recording started successfully")
-            
         except Exception as e:
             self.logger.error(f"Error in recording: {e}")
-            if self.audio:
-                self.audio.terminate()
-            self.audio = None
-            self.stream = None
-            self.is_recording = False
-            raise
+        finally:
+            self.stop()
 
-        
     def stop(self):
         """Stop recording audio"""
         self.recording = False
@@ -99,28 +77,26 @@ class AudioRecorder:
         with self.stream_lock:
             if self.stream is not None:
                 try:
-                    self.stream.stop_stream()
+                    self.stream.stop()
                     self.stream.close()
                     self.stream = None
                     self.logger.info("Audio recording stopped")
                     
                     # Process the complete audio buffer
-                    if self.frames:
-                        self.logger.info(f"Processing {len(self.frames)} frames of audio...")
-                        complete_audio = np.concatenate([np.frombuffer(f, dtype=np.float32) for f in self.frames])
+                    if self.audio_buffer and self.callback_fn:
+                        print("\nProcessing recorded audio...")
+                        complete_audio = np.concatenate(self.audio_buffer)
                         
                         # Debug audio data
-                        self.logger.info(f"Audio shape: {complete_audio.shape}")
-                        self.logger.info(f"Audio max value: {np.max(np.abs(complete_audio))}")
-                        self.logger.info(f"Audio min value: {np.min(complete_audio)}")
-                        self.logger.info(f"Audio mean value: {np.mean(np.abs(complete_audio))}")
+                        print(f"Audio shape: {complete_audio.shape}")
+                        print(f"Audio max value: {np.max(np.abs(complete_audio))}")
+                        print(f"Audio min value: {np.min(complete_audio)}")
+                        print(f"Audio mean value: {np.mean(np.abs(complete_audio))}")
                         
-                        if np.max(np.abs(complete_audio)) > 0:
-                            self.logger.info("Sending audio to transcription")
-                            if self.callback_fn:
-                                self.callback_fn(complete_audio)
+                        if np.max(np.abs(complete_audio)) > 0:  # Check if we have valid audio
+                            self.callback_fn(complete_audio)
                         else:
-                            self.logger.warning("No valid audio data detected")
+                            print("No valid audio data detected")
                     
                 except Exception as e:
                     self.logger.error(f"Error closing stream: {e}")
