@@ -57,6 +57,7 @@ config.json
 *.pem
 *.crt
 *.p12
+*test_*
 
 # Build artifacts
 *.spec
