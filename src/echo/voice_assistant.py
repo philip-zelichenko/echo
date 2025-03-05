@@ -1,5 +1,9 @@
+import os
+import sys
 import time
+import rumps
 import threading
+import subprocess
 from pynput import keyboard
 
 from echo.audio.recorder import AudioRecorder
@@ -14,10 +18,11 @@ from echo.utils.notifications import NotificationManager
 
 
 class VoiceAssistant:
-    def __init__(self):
+    def __init__(self, gui=None):
         self.logger = get_logger(__name__)
         self.logger.info("Initializing Voice Assistant...")
 
+        self.gui = gui
         self.recorder = AudioRecorder()
         self.transcription = Transcriber()
         self.openai = OpenAIService()
@@ -40,59 +45,68 @@ class VoiceAssistant:
             return
             
         try:
-            self.keyboard_listener = keyboard.Listener(
-                on_press=self.on_press,
-                suppress=False  # Don't suppress keys
-            )
-            self.keyboard_listener.start()
-            self.keyboard_initialized = True
-            self.logger.info("Keyboard listener started")
-            
-            # Check if we have accessibility permissions
-            if not self.keyboard_listener.is_alive():
-                self.notifications.notify(
-                    "Accessibility Required",
-                    "Please grant accessibility permissions in System Preferences",
-                    "⚠️",
-                    sound_type='error'
-                )
-                # Don't restart, just keep running without keyboard listener
-                self.logger.warning("Running without keyboard listener - accessibility not granted")
-                return False
+            # Check if we're running as bundled app
+            if getattr(sys, 'frozen', False):
+                self.logger.info("Running as bundled app - using rumps for shortcuts")
                 
+                if self.gui:
+                    # Get menu items (menu is a property, not a method)
+                    menu_items = self.gui._menu.values()
+                    
+                    # Add callbacks to existing menu items
+                    for item in menu_items:
+                        if isinstance(item, rumps.MenuItem):
+                            if "F9" in item.title:
+                                item.callback = self._handle_f9
+                            elif "F6" in item.title:
+                                item.callback = self._handle_f6
+                            elif "F7" in item.title:
+                                item.callback = self._handle_f7
+                            elif "F8" in item.title:
+                                item.callback = self._handle_f8
+                    
+                    self.keyboard_initialized = True
+                    return True
+                else:
+                    self.logger.error("No GUI instance available")
+                    return False
+            else:
+                # Use pynput for terminal/source runs
+                from pynput import keyboard
+                self.keyboard_listener = keyboard.Listener(
+                    on_press=self.on_press,
+                    on_release=self.on_release,
+                    suppress=False
+                )
+                self.keyboard_listener.daemon = True
+                self.keyboard_listener.start()
+                
+            self.keyboard_initialized = True
             return True
-            
+                
         except Exception as e:
             self.logger.error(f"Error starting keyboard listener: {e}")
             return False
-
-    def on_press_debug(self, key):
-        """Debug version of on_press to log all key presses"""
-        self.logger.info(f"Key pressed: {key}")
-        
-        try:
-            # F9 for recording
-            if key == keyboard.Key.f9:
-                self.logger.info("F9 pressed - toggle recording")
-                if not self.is_recording:
-                    self.start_recording()
-                else:
-                    self.stop_recording()
                     
-            # F6/F7 for tone
-            elif key == keyboard.Key.f6:
-                self.logger.info("F6 pressed - cycle tone")
-                self.toggle_tone()
-                
-            # F8 for communication type
-            elif key == keyboard.Key.f8:
-                self.logger.info("F8 pressed - cycle communication type")
-                self.cycle_comm_type()
-                
-        except Exception as e:
-            self.logger.error(f"Error handling key press: {e}")
+    def _handle_f9(self, sender):
+        """Handle F9 shortcut via rumps"""
+        if not self.is_recording:
+            self.start_recording()
+        else:
+            self.stop_recording()
 
+    def _handle_f6(self, sender):
+        """Handle F6 shortcut via rumps"""
+        self.toggle_tone()
 
+    def _handle_f7(self, sender):
+        """Handle F7 shortcut via rumps"""
+        self.cycle_comm_type()
+
+    def _handle_f8(self, sender):
+        """Handle F8 shortcut via rumps"""
+        self.show_status()
+                    
     def show_status(self):
         """Display current settings and send notification"""
         # Terminal display
@@ -171,6 +185,7 @@ class VoiceAssistant:
                 
                 # Get OpenAI response
                 print("Getting OpenAI response...")
+                self.openai.initialize()
                 response_text, processing_time = self.openai.process_text(
                     text, 
                     tone=self.current_tone,
@@ -235,21 +250,30 @@ class VoiceAssistant:
     def on_press(self, key):
         """Handle keyboard shortcuts"""
         try:
-            if key == keyboard.Key.f9:
-                if not self.is_recording:
-                    self.start_recording()
-                else:
-                    self.stop_recording()
-            elif key == keyboard.Key.f6:
-                self.toggle_tone()
-            elif key == keyboard.Key.f7:
-                self.cycle_comm_type()
-            elif key == keyboard.Key.f8:
-                # Show current status instead of testing notification
-                self.show_status()
-                
+            self.logger.debug(f"Key pressed: {key}")
+            # Only handle our specific shortcuts
+            if key in [keyboard.Key.f6, keyboard.Key.f7, keyboard.Key.f8, keyboard.Key.f9]:
+                if key == keyboard.Key.f9:
+                    if not self.is_recording:
+                        self.start_recording()
+                    else:
+                        self.stop_recording()
+                elif key == keyboard.Key.f6:
+                    self.toggle_tone()
+                elif key == keyboard.Key.f7:
+                    self.cycle_comm_type()
+                elif key == keyboard.Key.f8:
+                    self.show_status()
+                        
         except Exception as e:
             self.logger.error(f"Error handling key press: {e}")
+
+    def on_release(self, key):
+        """Handle key release events"""
+        try:
+            self.logger.debug(f"Key released: {key}")
+        except Exception as e:
+            self.logger.error(f"Error in key release handler: {e}")
 
     def check_microphone_permissions(self):
         """Check microphone access by attempting to open a test stream"""

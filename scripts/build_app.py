@@ -30,27 +30,27 @@ def clean_everything():
     print("\n🧹 Cleaning everything...")
     
     # Kill any running instances
-    subprocess.run(['pkill', '-f', 'Echo Assistant'], capture_output=True)
+    subprocess.run(['pkill', '-f', 'Echo'], capture_output=True)
     
     # Unload launch agent
     subprocess.run([
         'launchctl', 'unload',
-        os.path.expanduser('~/Library/LaunchAgents/com.echo.assistant.plist')
+        os.path.expanduser('~/Library/LaunchAgents/com.echo.plist')
     ], capture_output=True)
     
     # Remove launch agent file
-    launch_agent = Path.home() / 'Library/LaunchAgents/com.echo.assistant.plist'
+    launch_agent = Path.home() / 'Library/LaunchAgents/com.echo.plist'
     if launch_agent.exists():
         launch_agent.unlink()
     
     # Remove app and config
     paths_to_remove = [
-        Path("/Applications/Echo Assistant.app"),
-        Path.home() / '.echo_assistant',
+        Path("/Applications/Echo.app"),
+        Path.home() / '.echo',
         Path('build'),
         Path('dist'),
         Path('installer'),
-        Path('Echo Assistant.spec'),
+        Path('Echo.spec'),
     ]
     
     for path in paths_to_remove:
@@ -81,11 +81,12 @@ def clean_everything():
     print("✨ Clean complete!")
 
 def build_app():
-    """Build the Echo Assistant app"""
+    """Build the macOS app"""
+    app_name = "Echo"  # Changed to capital E
     # Clean everything first
     clean_everything()
     
-    print("\n🔨 Building Echo Assistant...")
+    print("\n🔨 Building Echo ...")
     
     # Get the absolute path to the project root
     project_root = Path(__file__).parent.parent
@@ -102,14 +103,18 @@ def build_app():
     # Define PyInstaller options
     options = [
         'src/echo/main.py',
-        '--name=Echo Assistant',
+        f'--name={app_name}',
         '--onedir',
-        '--windowed',
+        '--windowed',  # Important for GUI apps
+        '--noconsole',  # Don't show console when launching
         f'--icon={icon_path}',
         '--noconfirm',
         '--clean',
+        # Add Info.plist settings
+        '--osx-bundle-identifier=com.echo.app',
         # Add hidden imports
         '--hidden-import=numpy',
+        '--hidden-import=echo.setup',  # Add setup module
         '--hidden-import=numpy.core._dtype_ctypes',
         '--hidden-import=numpy.fft',
         '--hidden-import=echo.voice_assistant',
@@ -121,8 +126,9 @@ def build_app():
         '--hidden-import=av.filter.graph',
         '--hidden-import=av.audio.codeccontext',
         '--hidden-import=faster_whisper',
+        '--hidden-import=rumps',
         # Add data files
-        '--add-data=src/echo:echo',
+        '--add-data=src/echo/assets:echo/assets',
         '--collect-all=numpy',
         '--collect-all=av',
         '--collect-all=faster_whisper'
@@ -131,8 +137,67 @@ def build_app():
     # Run PyInstaller
     PyInstaller.__main__.run(options)
     
+    # Create Info.plist with additional settings
+    info_plist = Path(f"dist/{app_name}.app/Contents/Info.plist")
+    plist_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+        <key>CFBundleIdentifier</key>
+        <string>com.echo.app</string>
+        <key>CFBundleName</key>
+        <string>{app_name}</string>
+        <key>CFBundleDisplayName</key>
+        <string>{app_name}</string>
+        <key>CFBundleExecutable</key>
+        <string>{app_name}</string>
+        <key>CFBundlePackageType</key>
+        <string>APPL</string>
+        <key>CFBundleShortVersionString</key>
+        <string>1.0.0</string>
+        <key>LSMinimumSystemVersion</key>
+        <string>10.13.0</string>
+        <key>NSHighResolutionCapable</key>
+        <true/>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>Echo needs microphone access to record audio for transcription.</string>
+        <key>NSAppleEventsUsageDescription</key>
+        <string>Echo needs accessibility access to handle keyboard shortcuts.</string>
+        <key>NSRequiresAquaSystemAppearance</key>
+        <false/>
+        <key>LSUIElement</key>
+        <true/>
+        <key>LSBackgroundOnly</key>
+        <false/>
+        <key>NSSupportsAutomaticGraphicsSwitching</key>
+        <true/>
+        <key>NSAppleEventsUsageDescription</key>
+        <string>Echo needs accessibility access to handle keyboard shortcuts.</string>
+        <key>NSAccessibilityUsageDescription</key>
+        <string>Echo needs accessibility access to respond to keyboard shortcuts.</string>
+        <key>NSServices</key>
+        <array>
+            <dict>
+                <key>NSMenuItem</key>
+                <dict>
+                    <key>default</key>
+                    <string>Echo Voice Assistant</string>
+                </dict>
+                <key>NSMessage</key>
+                <string>runWorkflowAsService</string>
+                <key>NSRequiredContext</key>
+                <dict>
+                    <key>NSApplicationIdentifier</key>
+                    <string>com.echo.app</string>
+                </dict>
+            </dict>
+        </array>
+    </dict>
+    </plist>'''
+        
+    info_plist.write_text(plist_content)
     print("\n✅ Build complete!")
-    print("📦 Output: dist/Echo Assistant.app")
-
+    print(f"📦 Output: dist/{app_name}.app")
+        
 if __name__ == "__main__":
     build_app()
