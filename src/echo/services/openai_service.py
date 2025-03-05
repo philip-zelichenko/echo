@@ -1,22 +1,33 @@
+import os
 import openai
 import datetime
+from pathlib import Path
+from dotenv import load_dotenv
+
 from echo.utils.config import config
 from echo.utils.logger import get_logger
-
 from echo.utils.config import ToneMode, CommunicationType, BASE_CONTEXT
 
 
 class OpenAIService:
     def __init__(self):
         self.logger = get_logger(__name__)
+        self.client = None
+        
+    def initialize(self):
+        """Initialize OpenAI client with API key"""
+        # Load from the correct .env file location
+        env_path = Path.home() / '.echo' / '.env'
+        load_dotenv(env_path)
+        api_key = os.getenv('OPENAI_API_KEY')
         
         # Validate API key
-        if not config.openai.API_KEY or config.openai.API_KEY == "your-api-key-here":
+        if not api_key:
             self.logger.error("Invalid OpenAI API key. Please set OPENAI_API_KEY in .env file")
             raise ValueError("Invalid OpenAI API key")
             
         self.logger.info("Initializing OpenAI client...")
-        self.client = openai.OpenAI(api_key=config.openai.API_KEY)
+        self.client = openai.OpenAI(api_key=api_key)
 
     def process_text(self, text, tone=ToneMode.FRIENDLY, comm_type=CommunicationType.DM):
         try:
@@ -29,6 +40,8 @@ class OpenAIService:
             self.logger.info("Sending request to OpenAI...")
             print(f"\nSending request to OpenAI with API key: {config.openai.API_KEY[:8]}...")  # Show first 8 chars
             
+            self.initialize()
+
             response = self.client.chat.completions.create(
                 model=config.openai.MODEL,
                 temperature=config.openai.TEMPERATURE,

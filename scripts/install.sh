@@ -39,7 +39,7 @@ sed -i '' "s|YOUR_USERNAME|$USER|g" ~/Library/LaunchAgents/com.voiceassistant.pl
 chmod 644 ~/Library/LaunchAgents/com.voiceassistant.plist
 
 # Stop any existing processes
-pkill -f "Echo Assistant" 2>/dev/null
+pkill -f "Echo" 2>/dev/null
 launchctl remove com.voiceassistant 2>/dev/null
 
 # Load the LaunchAgent for auto-start on login
@@ -49,5 +49,5 @@ echo -e "${GREEN}Voice Assistant installed successfully!${NC}"
 echo -e "${YELLOW}The app will start automatically when you log in.${NC}"
 echo -e "${YELLOW}You can also start it manually:${NC}"
 echo -e "  • Double-click the app icon in Applications"
-echo -e "  • Or run: /Applications/Echo\\ Assistant.app/Contents/MacOS/Echo\\ Assistant"
+echo -e "  • Or run: /Applications/Echo.app/Contents/MacOS/Echo\\ Assistant"
 echo -e "${YELLOW}Check logs at: ~/Library/Logs/voiceassistant.log${NC}"

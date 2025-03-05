@@ -15,11 +15,11 @@ logger = get_logger(__name__)
 def load_config():
     """Load configuration from environment and config files"""
     # Create config directory if it doesn't exist
-    config_dir = Path.home() / '.echo_assistant'
+    config_dir = Path.home() / '.echo'
     config_dir.mkdir(parents=True, exist_ok=True)
     
     # Load environment variables from .env file
-    env_file = config_dir / 'config'
+    env_file = config_dir / '.env'
     if env_file.exists():
         load_dotenv(env_file)
     
@@ -28,7 +28,6 @@ def load_config():
         raise ValueError("OpenAI API key not found in configuration")
 
     return True
-
 
 class ToneMode(Enum):
     FRIENDLY = "friendly"

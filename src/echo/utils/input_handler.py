@@ -1,17 +1,62 @@
-import pyperclip
+import os
+import sys
 import time
+import platform
+import subprocess
+import pyperclip
 from pynput.keyboard import Controller, Key
+from pathlib import Path
 from echo.utils.logger import get_logger
+from echo.utils.notifications import NotificationManager
 
 class InputHandler:
     def __init__(self):
         self.logger = get_logger(__name__)
         self.keyboard = Controller()
-        self.typing_delay = 0.01  # Delay between characters (adjust if needed)
+        self.typing_delay = 0.01  # Delay between characters
+        self.notifications = NotificationManager()
 
+    def check_accessibility_permissions(self):
+        """Check if app has accessibility permissions"""
+        try:
+            if platform.system() != 'Darwin':
+                return True
+                
+            # Check if running as app bundle
+            if getattr(sys, 'frozen', False):
+                check_cmds = [
+                    ['osascript', '-e', 'tell application "System Events" to tell process "Echo Assistant" to return true'],
+                    ['osascript', '-e', 'tell application "System Events" to tell process "Echo" to return true']
+                ]
+                
+                for cmd in check_cmds:
+                    try:
+                        result = subprocess.run(cmd, capture_output=True)
+                        if result.returncode == 0:
+                            return True
+                    except Exception:
+                        continue
+                return False
+            else:
+                return True  # When running from source
+                
+        except Exception as e:
+            self.logger.error(f"Error checking accessibility: {e}")
+            return False
+    
     def type_text(self, text):
         """Type the text character by character at current cursor position"""
         try:
+            # Check permissions first
+            if not self.check_accessibility_permissions():
+                self.notifications.notify(
+                    "Accessibility Required",
+                    "Please grant accessibility permissions in System Settings → Privacy → Accessibility",
+                    "⚠️",
+                    sound_type='error'
+                )
+                return False
+
             # Copy to clipboard as backup
             pyperclip.copy(text)
             self.logger.info(f"Text copied to clipboard as backup: {text}")
@@ -47,6 +92,15 @@ class InputHandler:
         }
         
         try:
+            if not self.check_accessibility_permissions():
+                self.notifications.notify(
+                    "Accessibility Required",
+                    "Please grant accessibility permissions in System Settings → Privacy → Accessibility",
+                    "⚠️",
+                    sound_type='error'
+                )
+                return False
+
             for char in text:
                 if char in special_chars:
                     self.keyboard.press(special_chars[char])

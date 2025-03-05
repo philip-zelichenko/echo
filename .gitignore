@@ -1,5 +1,5 @@
 # Python
-__pycache__/
+**__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -57,7 +57,6 @@ config.json
 *.pem
 *.crt
 *.p12
-test*.py
 
 # Build artifacts
 *.spec
