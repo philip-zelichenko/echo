@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "echo"
+version = "0.1.0"
+description = "Voice Assistant"
+authors = ["Your Name <you@example.com>"]
+packages = [
+    { include = "echo", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = ">=3.11,<3.12"
+openai = "^1.0.0"
+faster-whisper = "^1.1.1"
+sounddevice = "^0.5.1"
+numpy = "^2.2.3"
+pynput = "^1.7.6"
+pyperclip = "^1.9.0"
+simpleaudio = "^1.0.4"
+pyautogui = "^0.9.54"
+python-dotenv = "^1.0.1"
+pillow = "^11.1.0"
+rumps = "^0.4.0"
+pyaudio = "^0.2.14"
+psutil = "^7.0.0"
+portalocker = "^3.1.1"
+
+[tool.poetry.group.dev.dependencies]
+pyinstaller = "^6.12.0"
+dmgbuild = "^1.6.4"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+va = "echo.cli:main"

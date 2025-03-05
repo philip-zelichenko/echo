@@ -1,0 +1,23 @@
+# Application Settings
+app:
+  name: "Echo Assistant"
+  version: "1.0.0"
+
+# Voice Settings
+voice:
+  language: "en-US"
+  rate: 200
+  volume: 1.0
+
+# System Settings
+system:
+  auto_start: true
+  working_directory: "~/echo"
+  log_level: "INFO"
+
+# Service Settings
+service:
+  port: 5000
+  host: "127.0.0.1"
+
+  
