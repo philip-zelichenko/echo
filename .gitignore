@@ -61,7 +61,7 @@ config.json
 # Build artifacts
 *.spec
 *.app
-*.dmg
+
 
 # Poetry
 poetry.lock 
