@@ -91,7 +91,20 @@ def build_app():
     
     # Get the absolute path to the project root
     project_root = Path(__file__).parent.parent
-        
+    app_path = project_root / "dist" / f"{app_name}.app"
+    
+    # Remove any existing app bundle
+    if app_path.exists():
+        shutil.rmtree(app_path)
+    
+    # Clean ALL extended attributes recursively before building
+    subprocess.run([
+        'find', '.',
+        '-not', '-path', './.git/*',  # Exclude .git directory
+        '-type', 'f',
+        '-exec', 'xattr', '-c', '{}', ';'
+    ], check=False)
+
     # App icon path - use .icns file instead of .png
     icon_path = project_root / "src" / "echo" / "assets" / "icons" / "echo.icns"  # Changed extension
             
@@ -121,6 +134,7 @@ def build_app():
         '--hidden-import=numpy.fft',
         '--hidden-import=echo.voice_assistant',
         '--hidden-import=echo.utils.notifications',
+        '--hidden-import=echo.services',  # Add parent module
         '--hidden-import=echo.services.transcriber',
         '--hidden-import=echo.services.openai_service',
         '--hidden-import=av',
@@ -141,6 +155,25 @@ def build_app():
     # Run PyInstaller
     PyInstaller.__main__.run(options)
     
+        # Remove any existing extended attributes
+    subprocess.run(['xattr', '-cr', f'dist/{app_name}.app'], check=False)
+    
+    # Sign the app bundle
+    try:
+        subprocess.run([
+            'codesign',
+            '--force',
+            '--deep',
+            '--sign', '-',
+            '--timestamp',
+            '--entitlements', 'entitlements.plist',
+            '--options', 'runtime',
+            str(app_path)
+        ], check=True)
+        print("✅ App bundle signed successfully")
+    except subprocess.CalledProcessError as e:
+        print(f"⚠️  Warning: Code signing failed: {e}")
+
     app_resources = Path(f"dist/{app_name}.app/Contents/Resources")
     if not (app_resources / "echo.icns").exists():
         shutil.copy2(icon_path, app_resources)

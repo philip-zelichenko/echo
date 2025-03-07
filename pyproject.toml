@@ -34,3 +34,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 va = "echo.cli:main"
+build-dmg = "scripts.create_dmg:create_dmg"
