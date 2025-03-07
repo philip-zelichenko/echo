@@ -1,3 +1,10 @@
+# First ignore everything in dist
+dist/*
+
+# Then only allow the DMG file
+!dist/Echo.dmg
+
+
 # Python
 **__pycache__/
 *.py[cod]
@@ -6,7 +13,6 @@
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -61,7 +67,6 @@ config.json
 # Build artifacts
 *.spec
 *.app
-
 
 # Poetry
 poetry.lock 
