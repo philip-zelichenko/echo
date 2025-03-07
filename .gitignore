@@ -1,3 +1,4 @@
+!*dist/Echo.dmg
 # Python
 **__pycache__/
 *.py[cod]
@@ -61,7 +62,7 @@ config.json
 # Build artifacts
 *.spec
 *.app
-
+*.dmg
 
 # Poetry
 poetry.lock 

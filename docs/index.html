@@ -41,243 +41,162 @@
 
     /* Body / Overall Page */
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0A0A0A;
-      color: #EEE;
-      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      overflow-x: hidden;
+      min-height: 100vh;
+      background: #111;
+      color: #fff;
     }
 
     /* Hero Section */
-    .hero {
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      position: relative;
-      padding: 100px 20px 60px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    .container {
+      max-width: 800px;
+      padding: 60px 20px;
       text-align: center;
-      animation: fadeIn 1.2s ease forwards;
     }
 
-    .hero h1 {
-      font-size: 3rem;
-      line-height: 1.2;
+    .logo {
+      width: 56px;
+      height: 56px;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2));
+      transition: all 0.2s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.03);
+      filter: drop-shadow(0 0 20px rgba(0, 122, 255, 0.3));
+    }
+
+    h1 {
+      font-size: 3.5em;
+      margin: 8px 0 10px 0;
       font-weight: 700;
-      margin-bottom: 20px;
-      color: #FFFFFF;
-      animation: scaleUp 0.8s ease forwards;
+      background: linear-gradient(45deg, #007AFF, #00C7FF);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .hero p {
-      font-size: 1.2rem;
-      color: #AAA;
-      max-width: 700px;
-      margin: 0 auto 30px auto;
-      line-height: 1.6;
+    .tagline {
+      font-size: 1.4em;
+      color: #999;
+      margin-bottom: 50px;
     }
 
-    .hero .action-btn {
+    .download-btn {
       display: inline-block;
-      background-color: #007AFF;
-      color: #FFF;
-      padding: 16px 46px;
-      border-radius: 8px;
+      background: linear-gradient(45deg, #007AFF, #00C7FF);
+      color: white;
+      padding: 18px 50px;
+      border-radius: 30px;
       text-decoration: none;
-      font-weight: 600;
-      font-size: 1rem;
-      transition: all 0.25s ease;
-      margin-top: 10px;
+      font-weight: 500;
+      font-size: 1.2em;
+      transition: all 0.3s ease;
       box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
     }
-    .hero .action-btn:hover {
-      background-color: #005BBB;
+
+    .download-btn:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
     }
 
-    .sub-text {
-      font-size: 0.9rem;
+    .version {
+      margin-top: 15px;
       color: #666;
-      margin-top: 12px;
-    }
-
-    /* Hero Graphic or Animated Visual */
-    .hero-graphic {
-      width: 100%;
-      max-width: 600px;
-      margin: 40px auto 0 auto;
-      animation: fadeIn 1.4s ease forwards;
-    }
-
-    /* Parallax scrolling effect for the hero graphic container */
-    .hero-graphic-container {
-      perspective: 1000px;
-      transform-style: preserve-3d;
-      width: 100%;
-      max-width: 600px;
-      margin: 40px auto 0 auto;
+      font-size: 0.9em;
     }
 
     /* Features Section */
-    .features-section {
-      width: 100%;
-      max-width: 1200px;
-      margin: 60px auto;
-      padding: 0 20px;
-      animation: fadeIn 1s ease forwards;
-    }
-    .features-grid {
+    .features {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-top: 40px;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 80px;
+      text-align: left;
     }
+
     .feature {
-      background-color: #1A1A1A;
-      border: 1px solid #333;
-      border-radius: 10px;
       padding: 30px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
       transition: transform 0.3s ease;
-      /* For tilt effect on hover */
-      transform-style: preserve-3d;
     }
+
     .feature:hover {
-      transform: translateY(-4px);
+      transform: translateY(-5px);
     }
+
     .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 16px;
-      display: block;
+      font-size: 2.5em;
+      margin-bottom: 15px;
     }
+
     .feature h3 {
-      font-size: 1.3rem;
-      font-weight: 600;
-      color: #FFF;
-      margin-bottom: 10px;
+      color: #fff;
+      margin: 0 0 10px 0;
     }
+
     .feature p {
-      font-size: 0.95rem;
-      color: #CCC;
-      line-height: 1.6;
+      color: #999;
+      margin: 0;
     }
 
     /* Footer */
     footer {
-      width: 100%;
-      padding: 20px;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #666;
       margin-top: auto;
+      padding: 30px;
+      color: #666;
     }
+
     footer a {
       color: #999;
       text-decoration: none;
-      transition: color 0.2s;
-    }
-    footer a:hover {
-      color: #007AFF;
+      transition: color 0.2s ease;
     }
 
-    /* Responsive Adjustments */
-    @media (max-width: 600px) {
-      .hero h1 {
-        font-size: 2.1rem;
-      }
-      .hero p {
-        font-size: 1rem;
-      }
+    footer a:hover {
+      color: #007AFF;
     }
   </style>
 </head>
 <body>
-
-  <section class="hero">
+  <div class="container">
+    <img src="https://raw.githubusercontent.com/philip-zelichenko/echo/main/src/echo/assets/icons/echo.png" alt="Echo Logo" class="logo">
     <h1>Echo</h1>
-    <p>Your AI-powered voice assistant for macOS, delivering lightning-fast voice commands and intelligent responses.</p>
+    <p class="tagline">Your AI-powered voice assistant for macOS</p>
+    <a href="https://github.com/philip-zelichenko/echo/releases/latest/download/Echo.dmg" class="download-btn">
+      Download Echo
+    </a>
+    <p class="version">Version 1.0.0</p>
     
-    <!-- Single primary CTA: Download Now -->
-    <a href="https://raw.githubusercontent.com/philip-zelichenko/echo/main/dist/Echo.dmg" class="action-btn">Download Now</a>
-    
-    <p class="sub-text">Version 1.0.0</p>
-
-    <!-- Parallax Container -->
-    <div class="hero-graphic-container">
-      <!-- Example Hero Graphic (placeholder, replace with your own) -->
-      <img src="https://raw.githubusercontent.com/philip-zelichenko/echo/main/src/echo/assets/icons/echo.png" alt="Echo" class="hero-graphic" />
-    </div>
-  </section>
-
-  <section class="features-section">
-    <div class="features-grid">
+    <div class="features">
       <div class="feature">
-        <span class="feature-icon">🎙️</span>
+        <div class="feature-icon">🎙️</div>
         <h3>Voice Commands</h3>
-        <p>Instantly capture your thoughts with a single keystroke (F9).</p>
+        <p>Instantly capture your thoughts with F9</p>
       </div>
       <div class="feature">
-        <span class="feature-icon">⚡️</span>
+        <div class="feature-icon">⚡️</div>
         <h3>Lightning Fast</h3>
-        <p>Powered by ChatGPT to deliver quick and intelligent responses.</p>
+        <p>Powered by ChatGPT for instant responses</p>
       </div>
       <div class="feature">
-        <span class="feature-icon">🎯</span>
+        <div class="feature-icon">🎯</div>
         <h3>Smart Modes</h3>
-        <p>Seamlessly switch between friendly and professional tones.</p>
+        <p>Switch between friendly and professional tones</p>
       </div>
     </div>
-  </section>
-
+  </div>
+  
   <footer>
-    <a href="https://github.com/philip-zelichenko/echo" target="_blank" rel="noopener noreferrer">View on GitHub</a>
+    <a href="https://github.com/philip-zelichenko/echo">View on GitHub</a>
   </footer>
-
-  <script>
-    // Parallax effect on hero graphic as user moves mouse
-    const heroGraphicContainer = document.querySelector('.hero-graphic-container');
-    const heroGraphic = document.querySelector('.hero-graphic');
-
-    heroGraphicContainer.addEventListener('mousemove', (e) => {
-      const rect = heroGraphicContainer.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const midX = rect.width / 2;
-      const midY = rect.height / 2;
-      const rotateX = (y - midY) / 25;
-      const rotateY = (x - midX) / 25;
-      heroGraphic.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
-    });
-
-    heroGraphicContainer.addEventListener('mouseleave', () => {
-      heroGraphic.style.transform = 'rotateX(0) rotateY(0)';
-    });
-
-    // 3D tilt effect for feature cards
-    const features = document.querySelectorAll('.feature');
-    features.forEach(feature => {
-      feature.addEventListener('mousemove', (e) => {
-        const rect = feature.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const midX = rect.width / 2;
-        const midY = rect.height / 2;
-        const rotateX = (y - midY) / 20;
-        const rotateY = (x - midX) / 20;
-        feature.style.transform = `rotateX(${ -rotateX}deg) rotateY(${rotateY}deg)`;
-      });
-      feature.addEventListener('mouseleave', () => {
-        feature.style.transform = 'rotateX(0) rotateY(0)';
-      });
-    });
-  </script>
 </body>
 </html>
