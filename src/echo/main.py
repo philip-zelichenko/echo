@@ -60,10 +60,10 @@ def main():
     # Check all permissions before starting
     permissions = PermissionsManager()
     
+    # Only check permissions once at startup
     if not permissions.check_all_permissions():
         logger.error("Missing required permissions")
-        time.sleep(2)  # Give time to read notification
-        sys.exit(1)
+        sys.exit(0)  # Exit cleanly
     
     try:
         # Initialize GUI

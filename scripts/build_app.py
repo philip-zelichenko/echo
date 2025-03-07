@@ -82,7 +82,8 @@ def clean_everything():
 
 def build_app():
     """Build the macOS app"""
-    app_name = "Echo"  # Changed to capital E
+    app_name = "Echo"
+    
     # Clean everything first
     clean_everything()
     
@@ -94,27 +95,23 @@ def build_app():
     # App icon path
     icon_path = project_root / "src" / "echo" / "assets" / "icons" / "echo.png"
     
-    # Get path to faster-whisper assets
-    import faster_whisper
-    whisper_path = Path(faster_whisper.__file__).parent
-    assets_path = whisper_path / "assets"
-    print(f"Including Whisper assets from: {assets_path}")
-    
     # Define PyInstaller options
     options = [
         'src/echo/main.py',
         f'--name={app_name}',
         '--onedir',
-        '--windowed',  # Important for GUI apps
-        '--noconsole',  # Don't show console when launching
+        '--windowed',
+        '--noconsole',
         f'--icon={icon_path}',
         '--noconfirm',
         '--clean',
-        # Add Info.plist settings
-        '--osx-bundle-identifier=com.echo.app',
+        # Add entitlements
+        '--osx-bundle-identifier=com.echo.assistant',
+        '--codesign-identity=-',
+        '--osx-entitlements-file=entitlements.plist',
         # Add hidden imports
         '--hidden-import=numpy',
-        '--hidden-import=echo.setup',  # Add setup module
+        '--hidden-import=echo.setup',
         '--hidden-import=numpy.core._dtype_ctypes',
         '--hidden-import=numpy.fft',
         '--hidden-import=echo.voice_assistant',
@@ -127,30 +124,32 @@ def build_app():
         '--hidden-import=av.audio.codeccontext',
         '--hidden-import=faster_whisper',
         '--hidden-import=rumps',
+        '--hidden-import=pynput',
+        '--hidden-import=pyaudio',
         # Add data files
         '--add-data=src/echo/assets:echo/assets',
         '--collect-all=numpy',
         '--collect-all=av',
         '--collect-all=faster_whisper'
     ]
-
+    
     # Run PyInstaller
     PyInstaller.__main__.run(options)
     
-    # Create Info.plist with additional settings
+    # Update Info.plist with additional settings
     info_plist = Path(f"dist/{app_name}.app/Contents/Info.plist")
-    plist_content = f'''<?xml version="1.0" encoding="UTF-8"?>
+    plist_content = '''<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
     <dict>
         <key>CFBundleIdentifier</key>
-        <string>com.echo.app</string>
+        <string>com.echo.assistant</string>
         <key>CFBundleName</key>
-        <string>{app_name}</string>
+        <string>Echo</string>
         <key>CFBundleDisplayName</key>
-        <string>{app_name}</string>
+        <string>Echo</string>
         <key>CFBundleExecutable</key>
-        <string>{app_name}</string>
+        <string>Echo</string>
         <key>CFBundlePackageType</key>
         <string>APPL</string>
         <key>CFBundleShortVersionString</key>
@@ -163,39 +162,19 @@ def build_app():
         <string>Echo needs microphone access to record audio for transcription.</string>
         <key>NSAppleEventsUsageDescription</key>
         <string>Echo needs accessibility access to handle keyboard shortcuts.</string>
-        <key>NSRequiresAquaSystemAppearance</key>
-        <false/>
+        <key>NSAccessibilityUsageDescription</key>
+        <string>Echo needs accessibility access to respond to keyboard shortcuts.</string>
         <key>LSUIElement</key>
         <true/>
         <key>LSBackgroundOnly</key>
         <false/>
         <key>NSSupportsAutomaticGraphicsSwitching</key>
         <true/>
-        <key>NSAppleEventsUsageDescription</key>
-        <string>Echo needs accessibility access to handle keyboard shortcuts.</string>
-        <key>NSAccessibilityUsageDescription</key>
-        <string>Echo needs accessibility access to respond to keyboard shortcuts.</string>
-        <key>NSServices</key>
-        <array>
-            <dict>
-                <key>NSMenuItem</key>
-                <dict>
-                    <key>default</key>
-                    <string>Echo Voice Assistant</string>
-                </dict>
-                <key>NSMessage</key>
-                <string>runWorkflowAsService</string>
-                <key>NSRequiredContext</key>
-                <dict>
-                    <key>NSApplicationIdentifier</key>
-                    <string>com.echo.app</string>
-                </dict>
-            </dict>
-        </array>
     </dict>
     </plist>'''
-        
-    info_plist.write_text(plist_content)
+    
+    with open(info_plist, 'w') as f:
+        f.write(plist_content)
     print("\n✅ Build complete!")
     print(f"📦 Output: dist/{app_name}.app")
         

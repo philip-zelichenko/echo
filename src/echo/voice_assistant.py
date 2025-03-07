@@ -45,49 +45,37 @@ class VoiceAssistant:
             return
             
         try:
-            # Check if we're running as bundled app
-            if getattr(sys, 'frozen', False):
-                self.logger.info("Running as bundled app - using rumps for shortcuts")
-                
-                if self.gui:
-                    # Get menu items (menu is a property, not a method)
-                    menu_items = self.gui._menu.values()
-                    
-                    # Add callbacks to existing menu items
-                    for item in menu_items:
-                        if isinstance(item, rumps.MenuItem):
-                            if "F9" in item.title:
-                                item.callback = self._handle_f9
-                            elif "F6" in item.title:
-                                item.callback = self._handle_f6
-                            elif "F7" in item.title:
-                                item.callback = self._handle_f7
-                            elif "F8" in item.title:
-                                item.callback = self._handle_f8
-                    
-                    self.keyboard_initialized = True
-                    return True
-                else:
-                    self.logger.error("No GUI instance available")
-                    return False
-            else:
-                # Use pynput for terminal/source runs
-                from pynput import keyboard
-                self.keyboard_listener = keyboard.Listener(
-                    on_press=self.on_press,
-                    on_release=self.on_release,
-                    suppress=False
-                )
-                self.keyboard_listener.daemon = True
-                self.keyboard_listener.start()
-                
+            # Always set up pynput listener
+            from pynput import keyboard
+            self.keyboard_listener = keyboard.Listener(
+                on_press=self.on_press,
+                on_release=self.on_release,
+                suppress=False
+            )
+            self.keyboard_listener.daemon = True
+            self.keyboard_listener.start()
+            
+            # If we're running as bundled app, also set up rumps callbacks
+            if getattr(sys, 'frozen', False) and self.gui:
+                menu_items = self.gui._menu.values()
+                for item in menu_items:
+                    if isinstance(item, rumps.MenuItem):
+                        if "F9" in item.title:
+                            item.callback = self._handle_f9
+                        elif "F6" in item.title:
+                            item.callback = self._handle_f6
+                        elif "F7" in item.title:
+                            item.callback = self._handle_f7
+                        elif "F8" in item.title:
+                            item.callback = self._handle_f8
+            
             self.keyboard_initialized = True
             return True
                 
         except Exception as e:
             self.logger.error(f"Error starting keyboard listener: {e}")
             return False
-                    
+                            
     def _handle_f9(self, sender):
         """Handle F9 shortcut via rumps"""
         if not self.is_recording:
