@@ -21,7 +21,6 @@ wheels/
 *.egg
 
 # Allow DMG file
-!dist
 !dist/Echo.dmg
 
 # Virtual Environment
