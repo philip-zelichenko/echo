@@ -39,11 +39,16 @@ def create_installer():
         fi
         cp -R "Echo.app" "/Applications/"
 
+        # Remove resource forks from installed app
+        xattr -cr "/Applications/Echo.app"
+
+        
         # Request permissions
         echo "🔐 Requesting permissions..."
-        tccutil reset All com.echo.app
+        tccutil reset All com.echo.assistant
         open "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
         open "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
+        open "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"
 
         echo "✅ Installation complete!"
         echo "🚀 Launch Echo from your Applications folder"

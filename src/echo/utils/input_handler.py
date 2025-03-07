@@ -22,28 +22,26 @@ class InputHandler:
             if platform.system() != 'Darwin':
                 return True
                 
-            # Check if running as app bundle
-            if getattr(sys, 'frozen', False):
-                check_cmds = [
-                    ['osascript', '-e', 'tell application "System Events" to tell process "Echo Assistant" to return true'],
-                    ['osascript', '-e', 'tell application "System Events" to tell process "Echo" to return true']
-                ]
-                
-                for cmd in check_cmds:
-                    try:
-                        result = subprocess.run(cmd, capture_output=True)
-                        if result.returncode == 0:
-                            return True
-                    except Exception:
-                        continue
+            # Force a permission prompt by attempting to use accessibility
+            try:
+                subprocess.run([
+                    'osascript',
+                    '-e',
+                    'tell application "System Events" to keystroke "x" using {command down}'
+                ], capture_output=True, check=True)
+                return True
+            except subprocess.CalledProcessError:
+                # Open System Settings to Accessibility
+                subprocess.run([
+                    "open",
+                    "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"
+                ])
                 return False
-            else:
-                return True  # When running from source
                 
         except Exception as e:
             self.logger.error(f"Error checking accessibility: {e}")
             return False
-    
+        
     def type_text(self, text):
         """Type the text character by character at current cursor position"""
         try:
