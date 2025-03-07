@@ -1,3 +1,10 @@
+# First ignore everything in dist
+dist/*
+
+# Then only allow the DMG file
+!dist/Echo.dmg
+
+
 # Python
 **__pycache__/
 *.py[cod]
@@ -6,7 +13,6 @@
 .Python
 build/
 develop-eggs/
-dist/*
 downloads/
 eggs/
 .eggs/
@@ -19,9 +25,6 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Allow DMG file
-!dist/Echo.dmg
 
 # Virtual Environment
 .env
