@@ -1,4 +1,5 @@
 import os
+import sys
 import platform
 import subprocess
 from pathlib import Path
@@ -27,12 +28,17 @@ class NotificationManager:
         # Try to find icon in various locations
         possible_paths = [
             # Check in app bundle first
-            Path("/Applications/Echo Assistant.app/Contents/Resources/echo/assets/icons/echo.png"),
+            Path("/Applications/Echo.app/Contents/Resources/echo/assets/icons/echo.png"),
             # Then check development paths
             Path(__file__).parent.parent / "assets" / "icons" / "echo.png",
-            Path(__file__).parent.parent.parent / "assets" / "icons" / "echo.png"
+            Path(__file__).parent.parent.parent / "assets" / "icons" / "echo.png",
+            # Add frozen path for PyInstaller
+            Path(sys._MEIPASS) / "echo" / "assets" / "icons" / "echo.png" if getattr(sys, 'frozen', False) else None
         ]
-        
+            
+        # Filter out None values
+        possible_paths = [p for p in possible_paths if p is not None]       
+
         for path in possible_paths:
             try:
                 if path.exists():
@@ -88,7 +94,9 @@ class NotificationManager:
                     self.terminal_notifier,
                     '-title', f'{emoji} {title}',
                     '-message', message,
-                    '-sound', self.sounds.get(sound_type, 'Pop')
+                    '-sound', self.sounds.get(sound_type, 'Pop'),
+                    '-sender', 'com.echo.assistant',  # Use bundle identifier
+                    '-appIcon', self.icon_path  # This will set the icon for the sender
                 ]
                 
                 subprocess.run(cmd, capture_output=True, timeout=1)
