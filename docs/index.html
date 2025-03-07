@@ -19,71 +19,82 @@
       box-sizing: border-box;
     }
 
-    /* Keyframes for subtle fade/zoom animations */
+    /* Keyframes for animations */
     @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes floatIn {
       0% {
         opacity: 0;
+        transform: translateY(-20px);
       }
       100% {
         opacity: 1;
+        transform: translateY(0);
       }
     }
-    @keyframes scaleUp {
-      0% {
-        transform: scale(0.95);
-        opacity: 0.7;
-      }
-      100% {
-        transform: scale(1);
-        opacity: 1;
-      }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+      0% { filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2)); }
+      50% { filter: drop-shadow(0 0 25px rgba(0, 122, 255, 0.4)); }
+      100% { filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2)); }
     }
 
     /* Body / Overall Page */
     body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0A0A0A;
-    color: #EEE;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0A0A0A;
+      color: #EEE;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
     }
 
     /* Hero Section */
     .hero {
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
-        position: relative;
-        padding: 20px 10px 30px;  /* Reduced top padding */
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        animation: fadeIn 1.2s ease forwards;
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      position: relative;
+      padding: 40px 20px 60px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 1.2s ease forwards;
     }
 
-    .logo, .hero-graphic {
-        transform: scale(0.15); /* Makes the image 25% of its original size */
-        margin-bottom: 16px;
-        filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2));
-        transition: all 0.2s ease;
+    /* Hero Graphic Container */
+    .hero-graphic-container {
+      perspective: 1000px;
+      transform-style: preserve-3d;
+      width: 80px;
+      height: 80px;
+      margin: 20px auto 0 auto;
+      animation: float 6s ease-in-out infinite;
     }
-    
+
     .hero-graphic {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto 20px auto;
-    animation: fadeIn 1.4s ease forwards;
-    filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2));
-    transition: all 0.2s ease;
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 20px auto;
+      filter: drop-shadow(0 0 15px rgba(0, 122, 255, 0.2));
+      transition: all 0.3s ease;
+      animation: floatIn 1s ease-out forwards;
     }
 
     .hero-graphic:hover {
-    transform: scale(1.03);
-    filter: drop-shadow(0 0 20px rgba(0, 122, 255, 0.3));
+      transform: scale(1.05) rotate(5deg);
+      filter: drop-shadow(0 0 25px rgba(0, 122, 255, 0.4));
     }
 
     .hero h1 {
@@ -92,7 +103,7 @@
       font-weight: 700;
       margin-bottom: 20px;
       color: #FFFFFF;
-      animation: scaleUp 0.8s ease forwards;
+      animation: fadeIn 0.8s ease forwards;
     }
 
     .hero p {
@@ -103,7 +114,7 @@
       line-height: 1.6;
     }
 
-    .hero .action-btn {
+    .action-btn {
       display: inline-block;
       background-color: #007AFF;
       color: #FFF;
@@ -116,7 +127,8 @@
       margin-top: 10px;
       box-shadow: 0 5px 15px rgba(0, 122, 255, 0.3);
     }
-    .hero .action-btn:hover {
+
+    .action-btn:hover {
       background-color: #005BBB;
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(0, 122, 255, 0.4);
@@ -128,16 +140,6 @@
       margin-top: 12px;
     }
 
-    /* Hero Graphic or Animated Visual */
-
-    /* Parallax scrolling effect for the hero graphic container */
-    .hero-graphic-container {
-    perspective: 1000px;
-    transform-style: preserve-3d;
-    width: 80px;  /* Match graphic size */
-    height: 80px; /* Match graphic size */
-    margin: 20px auto 0 auto;
-    }
     /* Features Section */
     .features-section {
       width: 100%;
@@ -146,12 +148,14 @@
       padding: 0 20px;
       animation: fadeIn 1s ease forwards;
     }
+
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 24px;
       margin-top: 40px;
     }
+
     .feature {
       background-color: #1A1A1A;
       border: 1px solid #333;
@@ -161,23 +165,26 @@
       position: relative;
       overflow: hidden;
       transition: transform 0.3s ease;
-      /* For tilt effect on hover */
       transform-style: preserve-3d;
     }
+
     .feature:hover {
       transform: translateY(-4px);
     }
+
     .feature-icon {
       font-size: 2rem;
       margin-bottom: 16px;
       display: block;
     }
+
     .feature h3 {
       font-size: 1.3rem;
       font-weight: 600;
       color: #FFF;
       margin-bottom: 10px;
     }
+
     .feature p {
       font-size: 0.95rem;
       color: #CCC;
@@ -193,11 +200,13 @@
       color: #666;
       margin-top: auto;
     }
+
     footer a {
       color: #999;
       text-decoration: none;
       transition: color 0.2s;
     }
+
     footer a:hover {
       color: #007AFF;
     }
@@ -214,18 +223,16 @@
   </style>
 </head>
 <body>
-
-<section class="hero">
-    <!-- Moved graphic to top -->
+  <section class="hero">
     <div class="hero-graphic-container">
-        <img src="https://raw.githubusercontent.com/philip-zelichenko/echo/main/src/echo/assets/icons/echo.png" alt="Echo" class="hero-graphic" />
+      <img src="https://raw.githubusercontent.com/philip-zelichenko/echo/main/src/echo/assets/icons/echo.png" alt="Echo" class="hero-graphic" />
     </div>
     <h1>Echo</h1>
     <p>Your AI-powered voice assistant for macOS, delivering lightning-fast voice commands and intelligent responses.</p>
     
-    <a href="https://github.com/philip-zelichenko/echo/blob/fix/pretify_landing_page/dist/Echo.dmg" class="action-btn">Download Now</a>
+    <a href="https://github.com/philip-zelichenko/echo/releases/latest/dist/Echo.dmg" class="action-btn">Download Now</a>
     <p class="sub-text">Version 1.0.0</p>
-</section>
+  </section>
 
   <section class="features-section">
     <div class="features-grid">
@@ -252,26 +259,25 @@
   </footer>
 
   <script>
-    // Parallax effect on hero graphic as user moves mouse
+    // Parallax effect on hero graphic
     const heroGraphicContainer = document.querySelector('.hero-graphic-container');
     const heroGraphic = document.querySelector('.hero-graphic');
 
     heroGraphicContainer.addEventListener('mousemove', (e) => {
-    const rect = heroGraphicContainer.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const midX = rect.width / 2;
-    const midY = rect.height / 2;
-    const rotateX = (y - midY) / 25;
-    const rotateY = (x - midX) / 25;
-    // Preserve the scale while adding rotation
-    heroGraphic.style.transform = `scale(1) rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
+      const rect = heroGraphicContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const midX = rect.width / 2;
+      const midY = rect.height / 2;
+      const rotateX = ((y - midY) / 25) * 0.5;
+      const rotateY = ((x - midX) / 25) * 0.5;
+      heroGraphic.style.transform = `scale(1.05) rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
     });
 
     heroGraphicContainer.addEventListener('mouseleave', () => {
-    // Reset to original state
-    heroGraphic.style.transform = 'scale(1) rotateX(0) rotateY(0)';
+      heroGraphic.style.transform = 'scale(1) rotateX(0) rotateY(0)';
     });
+
     // 3D tilt effect for feature cards
     const features = document.querySelectorAll('.feature');
     features.forEach(feature => {
@@ -283,7 +289,7 @@
         const midY = rect.height / 2;
         const rotateX = (y - midY) / 20;
         const rotateY = (x - midX) / 20;
-        feature.style.transform = `rotateX(${ -rotateX}deg) rotateY(${rotateY}deg)`;
+        feature.style.transform = `rotateX(${-rotateX}deg) rotateY(${rotateY}deg)`;
       });
       feature.addEventListener('mouseleave', () => {
         feature.style.transform = 'rotateX(0) rotateY(0)';
