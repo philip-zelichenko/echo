@@ -92,8 +92,9 @@ def build_app():
     # Get the absolute path to the project root
     project_root = Path(__file__).parent.parent
         
-    # App icon path
-    icon_path = project_root / "src" / "echo" / "assets" / "icons" / "echo.png"
+    # App icon path - use .icns file instead of .png
+    icon_path = project_root / "src" / "echo" / "assets" / "icons" / "echo.icns"  # Changed extension
+            
     
     # Define PyInstaller options
     options = [
@@ -109,6 +110,10 @@ def build_app():
         '--osx-bundle-identifier=com.echo.assistant',
         '--codesign-identity=-',
         '--osx-entitlements-file=entitlements.plist',
+        # Add data files - make sure icons are included
+        '--add-data=src/echo/assets/icons:echo/assets/icons',  # Add this line
+        # Add the entire echo package
+        '--add-data=src/echo:echo',
         # Add hidden imports
         '--hidden-import=numpy',
         '--hidden-import=echo.setup',
@@ -136,12 +141,18 @@ def build_app():
     # Run PyInstaller
     PyInstaller.__main__.run(options)
     
+    app_resources = Path(f"dist/{app_name}.app/Contents/Resources")
+    if not (app_resources / "echo.icns").exists():
+        shutil.copy2(icon_path, app_resources)
+
     # Update Info.plist with additional settings
     info_plist = Path(f"dist/{app_name}.app/Contents/Info.plist")
     plist_content = '''<?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
     <plist version="1.0">
     <dict>
+        <key>CFBundleIconFile</key>
+        <string>echo.icns</string>
         <key>CFBundleIdentifier</key>
         <string>com.echo.assistant</string>
         <key>CFBundleName</key>
@@ -175,6 +186,11 @@ def build_app():
     
     with open(info_plist, 'w') as f:
         f.write(plist_content)
+
+    # Copy icon file to Resources
+    resources_dir = Path(f"dist/{app_name}.app/Contents/Resources")
+    shutil.copy2(icon_path, resources_dir / "echo.icns")
+
     print("\n✅ Build complete!")
     print(f"📦 Output: dist/{app_name}.app")
         

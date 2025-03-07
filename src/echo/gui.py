@@ -11,7 +11,9 @@ class EchoGUI(rumps.App):
         else:
             resources_path = Path(__file__).parent / "assets" / "icons" / "echo.png"
             
-        super().__init__("Echo", icon=str(resources_path))
+        super().__init__("Echo", 
+                        icon=str(resources_path),
+                        quit_button=None)  # This prevents the automatic Quit item
         
         self.voice_assistant = voice_assistant
         
@@ -22,8 +24,9 @@ class EchoGUI(rumps.App):
             rumps.MenuItem("Cycle Mode (F7)", callback=self.handle_f7),
             rumps.MenuItem("Status (F8)", callback=self.handle_f8),
             None,  # separator
-            rumps.MenuItem("About"),
-            rumps.MenuItem("Quit")
+            rumps.MenuItem("About", callback=self.handle_about),  # Add callback
+            None,  # separator
+            rumps.MenuItem("Quit", callback=self.handle_quit)
         ]
 
     def set_voice_assistant(self, assistant):
@@ -47,3 +50,21 @@ class EchoGUI(rumps.App):
     def handle_f8(self, sender):
         if self.voice_assistant:
             self.voice_assistant.show_status()
+
+    def handle_about(self, _):
+        """Handle About menu item click"""
+        rumps.alert(
+            title="About Echo",
+            message="Echo - Your AI-powered voice companion\nVersion 1.0.0\n\n"
+                   "Made with ❤️ for productivity\n\n"
+                   "Keyboard Shortcuts:\n"
+                   "F9 - Start/Stop Recording\n"
+                   "F6 - Toggle Tone\n"
+                   "F7 - Switch Chat Mode\n"
+                   "F8 - Show Status",
+            ok="OK"
+        )
+
+    def handle_quit(self, _):
+        """Handle Quit menu item click"""
+        rumps.quit_application()
